@@ -6,7 +6,7 @@ import fs from 'fs'
 dotenv.config()
 
 const keyPath = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf-8'))
+const serviceAccount = keyPath
 
 admin.initializeApp({
   credential: cert(serviceAccount),
