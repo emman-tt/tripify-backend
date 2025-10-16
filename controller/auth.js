@@ -34,11 +34,12 @@ export async function saveGoogleData (req, res) {
 
     const decoded = await admin.auth().verifyIdToken(token)
     const uid = decoded.uid
-    const userName = decoded.name
+
+    const userEmail = decoded.email
+
     const email = decoded.email
 
     await db.ref(`users/${uid}/profile`).set({
-      user: userName,
       email: email
     })
 
