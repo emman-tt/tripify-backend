@@ -36,10 +36,12 @@ export async function saveGoogleData (req, res) {
     const uid = decoded.uid
 
     const userEmail = decoded.email
-
-    const email = decoded.email
+    const userRecord = await admin.auth().getUser(uid)
+    const userName = userRecord.displayName
+    const email = userRecord.email
 
     await db.ref(`users/${uid}/profile`).set({
+      name: userName,
       email: email
     })
 
