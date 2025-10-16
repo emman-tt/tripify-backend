@@ -7,7 +7,8 @@ dotenv.config()
 const app = express()
 app.use(
   cors({
-    origin: 'http://localhost:5173'
+    origin: "http://localhost:5173",
+    methods:["GET","POST"]
   })
 )
 
@@ -16,13 +17,13 @@ app.use(express.json())
 app.use('/api', routesFiles)
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Tripify Backend is running successfully on Vercel!' })
+  res.json({ message: 'Tripify Backend is running successfully!' })
 })
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+  console.log(`Server listening on port ${PORT}`)
+})
 
 export default app
