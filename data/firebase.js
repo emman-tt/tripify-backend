@@ -1,13 +1,13 @@
 import admin from 'firebase-admin'
 import dotenv from 'dotenv'
 import { cert } from 'firebase-admin/app'
-import fs from 'fs'
 
 dotenv.config()
 
 const keyPath = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
 const serviceAccount = JSON.parse(keyPath)
-
+console.log('Starting application...')
+console.log('Environment variables loaded:', Object.keys(process.env))
 admin.initializeApp({
   credential: cert(serviceAccount),
   databaseURL: process.env.DATABASE_URL
