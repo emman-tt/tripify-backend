@@ -5,7 +5,7 @@ import routesFiles from './routes/route.js'
 
 dotenv.config()
 const app = express()
-
+const PORT = process.env.PORT || 3000;
 app.use(
   cors({
     origin: 'http://localhost:5173'
@@ -20,12 +20,8 @@ app.get('/', (req, res) => {
   res.json({ message: 'Tripify Backend is running successfully on Vercel!' })
 })
 
-if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-  const PORT = process.env.PORT || 5000
-  app.listen(PORT, () => {
-   
-    console.log(`Server running locally on http://localhost:${PORT}`)
-  })
-}
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server listening on port ${PORT}`);
+});
 
 export default app
