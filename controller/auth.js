@@ -35,17 +35,21 @@ export async function saveGoogleData (req, res) {
     const decoded = await admin.auth().verifyIdToken(token)
     const uid = decoded.uid
 
-    const userEmail = decoded.email
     const userRecord = await admin.auth().getUser(uid)
-    const userName = userRecord.displayName
-    const email = userRecord.email
+    if (userRecord) {
+      const userName = userRecord.displayName
+      const email = userRecord.email
 
-    await db.ref(`users/${uid}/profile`).set({
-      name: userName,
-      email: email
-    })
+      await db.ref(`users/${uid}/profile`).set({
+        user: userName,
+        email: email
+      })
 
-    res.status(200).json({ message: 'User profile saved' })
+      res.status(200).json({
+        message: 'User profile saved',
+        userRecord
+      })
+    }
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
