@@ -51,7 +51,6 @@ export async function RemoveSavedTrip (req, res) {
       const promises = []
       snapshot.forEach(item => {
         const data = item.val()
-        // console.log(data)
         if (data.destination === req.body.name) {
           console.log(data)
           promises.push(item.ref.remove())
@@ -389,10 +388,51 @@ console.log(`Total places: ${placeNames.length}`)
 
 export async function Gemini (req, res) {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API })
-
     const search = req.body.userInput
-    console.log(search)
+    const authHeader = req.headers.authorization || ''
+    const token = authHeader.split(' ')[1]
+    if (!token) return res.status(401).json({ error: 'No token provided' })
+
+    const decoded = await admin.auth().verifyIdToken(token)
+    const uid = decoded.uid
+
+    const searchesRef = db.ref(`users/${uid}/searches`)
+    const snapshot = await searchesRef.once('value')
+
+    const SEARCH_LIMIT = 10
+
+    if (snapshot.exists()) {
+      const searches = snapshot.val()
+
+      let totalSearchCount = 0
+      for (const data of Object.values(searches)) {
+        totalSearchCount += data.numberOfTimes || 0
+      }
+
+      if (totalSearchCount >= SEARCH_LIMIT) {
+        return res.status(429).json({
+          error: 'Search limit reached',
+          message: `You've reached the maximum of ${SEARCH_LIMIT} searches.`,
+          totalSearches: totalSearchCount,
+          limit: SEARCH_LIMIT
+        })
+      }
+
+      for (const [key, data] of Object.entries(searches)) {
+        if (data.search === search) {
+          await searchesRef.child(key).update({
+            numberOfTimes: (data.numberOfTimes || 0) + 1
+          })
+
+          return res.status(200).json({
+            results: data.result,
+            cached: true
+          })
+        }
+      }
+    }
+
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API })
 
     const prompt = `
 You are an AI travel assistant for an app called Tripify.
@@ -415,19 +455,39 @@ ${JSON.stringify(placeNames)}
       model: 'gemini-2.5-flash',
       contents: prompt
     })
-    // console.log(result)
+
     const response = result.text
-    console.log(response)
+
     try {
       const matches = JSON.parse(response)
-      console.log(matches)
+
+      await searchesRef.push({
+        search: search,
+        result: matches,
+        numberOfTimes: 1
+      })
+
+      const snapshot2 = await searchesRef.once('value')
+      let newTotal = 0
+      if (snapshot2.exists()) {
+        for (const data of Object.values(snapshot2.val())) {
+          newTotal += data.numberOfTimes || 0
+        }
+      }
+
       res.status(200).json(matches)
       return
-    } catch (err) {
+    } catch (parseError) {
       console.error('AI response parse error:', response)
-      return []
+      return res.status(500).json({
+        error: 'Failed to parse AI response',
+        details: parseError.message
+      })
     }
   } catch (error) {
-    console.log(error.message)
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    })
   }
 }
