@@ -6,14 +6,14 @@ import routesFiles from './routes/route.js'
 dotenv.config()
 const app = express()
 
-app.use(cors())
+// app.use(cors())
 
-// app.use(
-//   cors({
-//     origin: 'http://localhost:5173',
-//     methods: ['GET', 'POST']
-//   })
-// )
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST']
+  })
+)
 
 app.use(express.json())
 
