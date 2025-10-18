@@ -426,7 +426,6 @@ export async function Gemini (req, res) {
 
           return res.status(200).json({
             results: data.result,
-            cached: true
           })
         }
       }

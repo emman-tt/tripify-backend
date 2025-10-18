@@ -79,9 +79,9 @@ export async function readUsername (req, res) {
     if (!token) return res.status(401).json({ error: 'No token provided' })
     const decoded = await admin.auth().verifyIdToken(token)
     const uid = decoded.uid
-    // const snapshot = await db.ref(`users/${uid}/profile`).once('value')
-    // const userName = snapshot.val().user
-    res.status(200).json(uid || 'invalid')
+    const snapshot = await db.ref(`users/${uid}/profile`).once('value')
+    const userName = snapshot.val().user
+    res.status(200).json(userName || 'invalid')
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
