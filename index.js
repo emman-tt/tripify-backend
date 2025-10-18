@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Tripify Backend is running successfully!' })
 })
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT 
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server listening on port ${PORT}`)
